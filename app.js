@@ -3,6 +3,13 @@ import express from "express";
 
 // Import the configured Slack events application
 import slackEventsApp from "./slack/slack-events.js";
+//import redisClient from "./redis/redis-client.js";
+
+import {
+    connectRedis
+} from "./redis/redis-client.js";
+
+await connectRedis();
 
 dotenv.config();
 
@@ -54,6 +61,11 @@ app.listen(PORT, () => {
     //   text: "How can I help you today?",
     // });
     // console.log("Post Message in Thread Result:", threadResult);
+
+    //await connectRedis();
+
+    //console.log("Redis connected successfully.");
+
     console.log("All Slack tool functions executed successfully.");
   } catch (error) {
     console.error("Error:", error);

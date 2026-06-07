@@ -8,3 +8,5 @@ generated/
 
 .DS_Store
 Thumbs.db
+tests/
+workflow-tests/

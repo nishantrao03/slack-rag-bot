@@ -28,14 +28,35 @@ const boltApp = new App({
 });
 
 boltApp.event("app_mention", async (args) => {
+  const { event } = args;
     
   console.log("Bot mention received:", {
-    channel: args.channel,
-    user: args.user,
-    text: args.text,
-    threadTs: args.thread_ts,
+    channel: event.channel,
+    user: event.user,
+    text: event.text,
+    threadTs: event.thread_ts,
+    files: event.files,
   });
   await handleAppMention(args);
+});
+
+boltApp.event("message", async (args) => {
+  const { event } = args;
+
+  if (
+    event.channel_type === "im" &&
+    !event.bot_id
+  ) {
+    console.log("DM received:", {
+      channel: event.channel,
+      user: event.user,
+      text: event.text,
+      threadTs: event.thread_ts,
+      files: event.files,
+    });
+
+    await handleAppMention(args);
+  }
 });
 
 // Export the Express application instance from the receiver

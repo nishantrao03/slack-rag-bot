@@ -8,8 +8,7 @@ datasource db {
 
 model User {
   slack_member_id String @id
-  email           String @unique
-  name            String?
+
   created_at      DateTime @default(now())
 
   projects         ProjectMember[]
@@ -27,6 +26,7 @@ model Project {
   members     ProjectMember[]
   channels    Channel[]
   documents   Document[]
+  threads     Thread[]
 }
 
 model ProjectMember {
@@ -48,7 +48,18 @@ model Channel {
   channel_id String   @id
   name       String
   project_id String
+  canvas_id String?
   is_private Boolean
+  created_at DateTime @default(now())
+
+  project    Project @relation(fields: [project_id], references: [id])
+
+  @@index([project_id])
+}
+
+model Thread {
+  thread_id  String   @id
+  project_id String
   created_at DateTime @default(now())
 
   project    Project @relation(fields: [project_id], references: [id])

@@ -1,4 +1,4 @@
-import boltApp from "../bolt.js";
+import boltApp from "../../slack/bolt.js";
 import dotenv from 'dotenv';
 dotenv.config();
 

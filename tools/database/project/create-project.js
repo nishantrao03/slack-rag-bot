@@ -1,4 +1,4 @@
-import prisma from "../../../services/db/prismaClient.js";
+import prisma from "../../../services/db/prisma-client.js";
 import crypto from "crypto";
 
 async function createProject({ projectName, creatorSlackId }) {
