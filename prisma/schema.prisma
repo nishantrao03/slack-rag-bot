@@ -70,7 +70,7 @@ model Thread {
 model Document {
   document_id String   @id @default(uuid())
   name        String
-  link        String
+  link        String?
   project_id  String
   uploaded_by String
   created_at  DateTime @default(now())

@@ -1,9 +1,8 @@
 import prisma from "../../../services/db/prisma-client.js";
-import crypto from "crypto";
 
 async function createDocuments(documents) {
   const documentsToCreate = documents.map((document) => ({
-    document_id: crypto.randomUUID(),
+    document_id: document.documentId,
     name: document.name,
     link: document.link,
     project_id: document.projectId,
