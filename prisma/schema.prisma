@@ -73,6 +73,7 @@ model Document {
   link        String?
   project_id  String
   uploaded_by String
+  is_private  Boolean  @default(false)
   created_at  DateTime @default(now())
 
   project     Project @relation(fields: [project_id], references: [id])

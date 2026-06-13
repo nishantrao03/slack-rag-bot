@@ -110,16 +110,37 @@ dotenv.config();
 
 const CONTEXT_RETRIEVAL_SERVICE_URL  = process.env.CONTEXT_RETRIEVAL_SERVICE_URL;
 
-async function retrieveChunks(query, project_id) {
-    if (!query || typeof query !== "string") {
+async function retrieveChunks(
+    query,
+    project_id,
+    apply_privacy_filter
+) {
+    if (
+        !query
+        || typeof query !==
+            "string"
+    ) {
         throw new Error(
             "query must be a valid string."
         );
     }
 
-    if (!project_id || typeof project_id !== "string") {
+    if (
+        !project_id
+        || typeof project_id !==
+            "string"
+    ) {
         throw new Error(
             "project_id must be a valid string."
+        );
+    }
+
+    if (
+        typeof apply_privacy_filter !==
+        "boolean"
+    ) {
+        throw new Error(
+            "apply_privacy_filter must be a boolean."
         );
     }
 
@@ -128,14 +149,21 @@ async function retrieveChunks(query, project_id) {
         {
             method: "POST",
             headers: {
-                "Content-Type": "application/json"
+                "Content-Type":
+                    "application/json"
             },
-            body: JSON.stringify({ query, project_id })
+            body: JSON.stringify({
+                query,
+                project_id,
+                apply_privacy_filter
+            })
         }
     );
 
     if (!response.ok) {
-        const errorResponse = await response.text();
+        const errorResponse =
+            await response.text();
+
         throw new Error(
             `Retrieve chunks failed: ${errorResponse}`
         );

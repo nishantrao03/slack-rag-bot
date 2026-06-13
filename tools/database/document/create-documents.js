@@ -7,6 +7,7 @@ async function createDocuments(documents) {
     link: document.link,
     project_id: document.projectId,
     uploaded_by: document.slackMemberId,
+    is_private: document.isPrivate
   }));
 
   await prisma.document.createMany({

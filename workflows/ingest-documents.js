@@ -14,6 +14,12 @@ import createDocuments from "../tools/database/document/create-documents.js";
  * - url_private
  * - permalink
  * - permalink_public
+ * Privacy Rules:
+ * - Set is_private=true for confidential or restricted content.
+ * - Set is_private=false for content accessible to all project members.
+ * - File privacy is controlled per file object.
+ * - Text content privacy is controlled through isTextContentPrivate.
+ * - Privacy settings affect retrieval visibility.
  *
  * Supported sources:
  * - Slack files
@@ -25,14 +31,16 @@ import createDocuments from "../tools/database/document/create-documents.js";
  * @param {Object} params
  * @param {string} params.projectId
  * @param {string} params.slackMemberId
- * @param {Array<string>} [params.fileUrls=[]]
+ * @param {Array<{fileUrl: string, is_private: boolean}>} [params.fileUrls=[]]
  * @param {string} [params.textContent]
+ * @param {boolean} [params.isTextContentPrivate=false]
  * @returns {Object}
  */
 async function ingestDocumentsWorkflow({
     projectId,
     slackMemberId,
     textContent,
+    isTextContentPrivate = false,
     fileUrls = [],
 }) {
     try {
@@ -56,6 +64,26 @@ async function ingestDocumentsWorkflow({
 ) {
     throw new Error(
         "fileUrls must be an array."
+    );
+}
+
+for (const fileObj of fileUrls) {
+    if (
+        typeof fileObj.is_private !==
+        "boolean"
+    ) {
+        throw new Error(
+            "fileObj.is_private must be a boolean."
+        );
+    }
+}
+
+if (
+    typeof isTextContentPrivate !==
+    "boolean"
+) {
+    throw new Error(
+        "isTextContentPrivate must be a boolean."
     );
 }
 
@@ -85,7 +113,10 @@ if (
 
         const filesMetadata =
             fileUrls.map(
-                (fileUrl) => {
+                (fileObj) => {
+                    const fileUrl =
+                        fileObj.fileUrl;
+
                     const documentId =
                         crypto.randomUUID();
 
@@ -127,6 +158,7 @@ if (
                         {
                             documentId,
                             link: fileUrl,
+                            isPrivate: fileObj.is_private,
                         }
                     );
 
@@ -152,7 +184,10 @@ if (
                             documentName,
 
                         text_content:
-                            null
+                            null,
+
+                        is_private:
+                            fileObj.is_private
                     };
                 }
             );
@@ -182,6 +217,9 @@ if (
 
         text_content:
             textContent,
+
+        is_private:
+            isTextContentPrivate,
     });
 
     documentMetadataMap.set(
@@ -189,6 +227,7 @@ if (
         {
             documentId,
             link: null,
+            isPrivate: isTextContentPrivate,
         }
     );
 }
@@ -264,6 +303,11 @@ if (
                     projectId,
 
                     slackMemberId,
+
+                    isPrivate:
+                documentMetadataMap.get(
+                    document.document_id
+                ).isPrivate,
                 })
             );
 

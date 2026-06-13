@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE "Document" ADD COLUMN     "is_private" BOOLEAN NOT NULL DEFAULT false;
