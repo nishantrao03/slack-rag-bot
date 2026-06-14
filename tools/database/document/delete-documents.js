@@ -12,16 +12,23 @@ async function deleteDocuments(documentIds) {
   if (!Array.isArray(documentIds) || documentIds.length === 0) {
     return [];
   }
-
-  await prisma.document.deleteMany({
-    where: {
-      document_id: {
-        in: documentIds,
+  try {
+    await prisma.document.deleteMany({
+      where: {
+        document_id: {
+          in: documentIds,
+        },
       },
-    },
-  });
+    });
 
-  return documentIds;
+    return documentIds;
+  } catch (error) {
+    const err = new Error(
+      `deleteDocuments failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
+  }
 }
 
 export default deleteDocuments;

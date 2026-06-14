@@ -15,50 +15,58 @@ async function removeMembersFromChannel({
   channel,
   userIds,
 }) {
-  if (!channel) {
-    throw new Error(
-      "channel is required."
-    );
-  }
+  try {
+    if (!channel) {
+      throw new Error(
+        "channel is required."
+      );
+    }
 
-  if (
-    !Array.isArray(
-      userIds
-    )
-  ) {
-    throw new Error(
-      "userIds must be an array."
-    );
-  }
+    if (
+      !Array.isArray(
+        userIds
+      )
+    ) {
+      throw new Error(
+        "userIds must be an array."
+      );
+    }
 
-  const results = [];
+    const results = [];
 
-  for (
-    const userId
-    of userIds
-  ) {
-    const result =
-      await boltApp.client.conversations.kick({
-        token:
-          process.env.SLACK_BOT_TOKEN,
-        channel,
-        user:
-          userId,
+    for (
+      const userId
+      of userIds
+    ) {
+      const result =
+        await boltApp.client.conversations.kick({
+          token:
+            process.env.SLACK_BOT_TOKEN,
+          channel,
+          user:
+            userId,
+        });
+
+      results.push({
+        userId,
+        removed:
+          result.ok,
       });
+    }
 
-    results.push({
-      userId,
-      removed:
-        result.ok,
-    });
+    return {
+      channelId:
+        channel,
+      removedUsers:
+        results,
+    };
+  } catch (error) {
+    const err = new Error(
+      `removeMembersFromChannel failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
   }
-
-  return {
-    channelId:
-      channel,
-    removedUsers:
-      results,
-  };
 }
 
 export default removeMembersFromChannel;

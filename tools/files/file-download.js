@@ -158,55 +158,63 @@ async function processFile(
 async function buildUpdateText(
   files
 ) {
-  if (!Array.isArray(files)) {
-    throw new Error(
-      "files must be an array."
-    );
-  }
-
-  await fs.mkdir(
-    TEMP_UPLOADS_DIR,
-    {
-      recursive: true
+  try {
+    if (!Array.isArray(files)) {
+      throw new Error(
+        "files must be an array."
+      );
     }
-  );
 
-  const contentArray =
-    new Array(files.length);
+    await fs.mkdir(
+      TEMP_UPLOADS_DIR,
+      {
+        recursive: true
+      }
+    );
 
-  const limit = pLimit(
-    CONCURRENCY_LIMIT
-  );
+    const contentArray =
+      new Array(files.length);
 
-  console.log(
-    `[Update Builder] Starting processing for ${files.length} files`
-  );
+    const limit = pLimit(
+      CONCURRENCY_LIMIT
+    );
 
-  await Promise.all(
-    files.map(
-      (file, index) =>
-        limit(() =>
-          processFile(
-            file,
-            index,
-            contentArray
+    console.log(
+      `[Update Builder] Starting processing for ${files.length} files`
+    );
+
+    await Promise.all(
+      files.map(
+        (file, index) =>
+          limit(() =>
+            processFile(
+              file,
+              index,
+              contentArray
+            )
           )
-        )
-    )
-  );
+      )
+    );
 
-  console.log(
-    "[Update Builder] All file processing completed"
-  );
+    console.log(
+      "[Update Builder] All file processing completed"
+    );
 
-  const updateText =
-    contentArray.join("\n\n");
+    const updateText =
+      contentArray.join("\n\n");
 
-  console.log(
-    "[Update Builder] updateText generated successfully"
-  );
+    console.log(
+      "[Update Builder] updateText generated successfully"
+    );
 
-  return updateText;
+    return updateText;
+  } catch (error) {
+    const err = new Error(
+      `buildUpdateText failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
+  }
 }
 
 export default buildUpdateText;

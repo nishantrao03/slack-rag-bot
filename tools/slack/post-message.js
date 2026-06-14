@@ -11,13 +11,21 @@ dotenv.config();
  * @returns {Object} Slack API response
  */
 export async function postMessage({ channel, text }) {
-  const result = await boltApp.client.chat.postMessage({
-    token: process.env.SLACK_BOT_TOKEN,
-    channel,
-    text,
-  });
+  try {
+    const result = await boltApp.client.chat.postMessage({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel,
+      text,
+    });
 
-  return result;
+    return result;
+  } catch (error) {
+    const err = new Error(
+      `postMessage failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
+  }
 }
 
 export default postMessage;

@@ -2,21 +2,29 @@ import fs from "fs/promises";
 import { PDFParse } from "pdf-parse";
 
 async function extractPdf(filePath) {
-  const buffer = await fs.readFile(
-    filePath
-  );
-
-  const parser = new PDFParse({
-    data: buffer
-  });
-
   try {
-    const result =
-      await parser.getText();
+    const buffer = await fs.readFile(
+      filePath
+    );
 
-    return result.text;
-  } finally {
-    await parser.destroy();
+    const parser = new PDFParse({
+      data: buffer
+    });
+
+    try {
+      const result =
+        await parser.getText();
+
+      return result.text;
+    } finally {
+      await parser.destroy();
+    }
+  } catch (error) {
+    const err = new Error(
+      `extractPdf failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
   }
 }
 

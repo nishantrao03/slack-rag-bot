@@ -12,13 +12,21 @@ dotenv.config();
  * @returns {Object} Slack API response
  */
 async function addMembersToChannel({ channel, userIds }) {
-  const result = await boltApp.client.conversations.invite({
-    token: process.env.SLACK_BOT_TOKEN,
-    channel,
-    users: userIds.join(","),
-  });
+  try {
+    const result = await boltApp.client.conversations.invite({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel,
+      users: userIds.join(","),
+    });
 
-  return result;
+    return result;
+  } catch (error) {
+    const err = new Error(
+      `addMembersToChannel failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
+  }
 }
 
 export default addMembersToChannel;

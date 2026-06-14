@@ -10,19 +10,27 @@ import prisma from "../../../services/db/prisma-client.js";
 async function fetchCanvasForChannel({
   channelIds,
 }) {
-  const channels = await prisma.channel.findMany({
-    where: {
-      channel_id: {
-        in: channelIds,
+  try {
+    const channels = await prisma.channel.findMany({
+      where: {
+        channel_id: {
+          in: channelIds,
+        },
       },
-    },
-    select: {
-      channel_id: true,
-      canvas_id: true,
-    },
-  });
+      select: {
+        channel_id: true,
+        canvas_id: true,
+      },
+    });
 
-  return channels;
+    return channels;
+  } catch (error) {
+    const err = new Error(
+      `fetchCanvasForChannel failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
+  }
 }
 
 export default fetchCanvasForChannel;

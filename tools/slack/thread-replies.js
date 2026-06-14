@@ -7,14 +7,22 @@ import webClient from "../../slack/web_client.js";
  * @param {string} params.threadTs - Thread timestamp
  */
 export default async function getThreadReplies({ channel, threadTs }) {
-  const response = await webClient.conversations.replies({
-    channel,
-    ts: threadTs
-  });
+  try {
+    const response = await webClient.conversations.replies({
+      channel,
+      ts: threadTs
+    });
 
-  if (!response.ok) {
-    throw new Error("Failed to fetch thread replies");
+    if (!response.ok) {
+      throw new Error("Failed to fetch thread replies");
+    }
+
+    return response.messages || [];
+  } catch (error) {
+    const err = new Error(
+      `getThreadReplies failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
   }
-
-  return response.messages || [];
 }

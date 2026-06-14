@@ -10,23 +10,29 @@ import prisma from "../../../services/db/prisma-client.js";
 async function createCanvasForChannel({
   channelCanvasPairs,
 }) {
-  const updateOperations = channelCanvasPairs.map(
-    ({ channelId, canvasId }) =>
-      prisma.channel.update({
-        where: {
-          channel_id: channelId,
-        },
-        data: {
-          canvas_id: canvasId,
-        },
-      })
-  );
+  try {
+    const updateOperations = channelCanvasPairs.map(
+      ({ channelId, canvasId }) =>
+        prisma.channel.update({
+          where: {
+            channel_id: channelId,
+          },
+          data: {
+            canvas_id: canvasId,
+          },
+        })
+    );
 
-  const channels = await prisma.$transaction(
-    updateOperations
-  );
+    const channels = await prisma.$transaction(updateOperations);
 
-  return channels;
+    return channels;
+  } catch (error) {
+    const err = new Error(
+      `createCanvasForChannel failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
+  }
 }
 
 export default createCanvasForChannel;

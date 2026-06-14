@@ -10,40 +10,48 @@ import prisma from "../../../services/db/prisma-client.js";
 async function updateProjectNames({
     projects
 }) {
-    if (!Array.isArray(projects)) {
-        throw new Error(
-            "projects must be an array."
-        );
-    }
+    try {
+        if (!Array.isArray(projects)) {
+            throw new Error(
+                "projects must be an array."
+            );
+        }
 
-    const results = [];
+        const results = [];
 
-    for (const project of projects) {
-        const updatedProject =
-            await prisma.project.update({
-                where: {
-                    id:
-                        project.projectId
-                },
-                data: {
-                    name:
-                        project.projectName
-                }
+        for (const project of projects) {
+            const updatedProject =
+                await prisma.project.update({
+                    where: {
+                        id:
+                            project.projectId
+                    },
+                    data: {
+                        name:
+                            project.projectName
+                    }
+                });
+
+            results.push({
+                projectId:
+                    updatedProject.id,
+                projectName:
+                    updatedProject.name
             });
+        }
 
-        results.push({
-            projectId:
-                updatedProject.id,
-            projectName:
-                updatedProject.name
-        });
+        return {
+            count:
+                results.length,
+            results
+        };
+    } catch (error) {
+        const err = new Error(
+            `updateProjectNames failed: ${error && error.message ? error.message : String(error)}`
+        );
+        err.originalError = error;
+        throw err;
     }
-
-    return {
-        count:
-            results.length,
-        results
-    };
 }
 
 export default updateProjectNames;

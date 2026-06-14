@@ -12,41 +12,49 @@ async function removeUsersFromProject({
     projectId,
     userIds,
 }) {
-    if (!projectId) {
-        throw new Error(
-            "projectId is required."
-        );
-    }
+    try {
+        if (!projectId) {
+            throw new Error(
+                "projectId is required."
+            );
+        }
 
-    if (
-        !Array.isArray(
-            userIds
-        )
-    ) {
-        throw new Error(
-            "userIds must be an array."
-        );
-    }
+        if (
+            !Array.isArray(
+                userIds
+            )
+        ) {
+            throw new Error(
+                "userIds must be an array."
+            );
+        }
 
-    const result =
-        await prisma.projectMember.deleteMany({
-            where: {
-                project_id:
-                    projectId,
-                user_id: {
-                    in:
-                        userIds,
+        const result =
+            await prisma.projectMember.deleteMany({
+                where: {
+                    project_id:
+                        projectId,
+                    user_id: {
+                        in:
+                            userIds,
+                    },
                 },
-            },
-        });
+            });
 
-    return {
-        projectId,
-        requestedUserIds:
-            userIds,
-        removedCount:
-            result.count,
-    };
+        return {
+            projectId,
+            requestedUserIds:
+                userIds,
+            removedCount:
+                result.count,
+        };
+    } catch (error) {
+        const err = new Error(
+            `removeUsersFromProject failed: ${error && error.message ? error.message : String(error)}`
+        );
+        err.originalError = error;
+        throw err;
+    }
 }
 
 export default removeUsersFromProject;

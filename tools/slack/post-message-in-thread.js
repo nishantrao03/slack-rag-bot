@@ -13,14 +13,22 @@ dotenv.config();
  * @returns {Object} Slack API response
  */
 async function postMessageInThread({ channel, threadTs, text }) {
-  const result = await boltApp.client.chat.postMessage({
-    token: process.env.SLACK_BOT_TOKEN,
-    channel,
-    text,
-    thread_ts: threadTs,
-  });
+  try {
+    const result = await boltApp.client.chat.postMessage({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel,
+      text,
+      thread_ts: threadTs,
+    });
 
-  return result;
+    return result;
+  } catch (error) {
+    const err = new Error(
+      `postMessageInThread failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
+  }
 }
 
 export default postMessageInThread;

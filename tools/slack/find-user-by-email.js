@@ -13,37 +13,45 @@ dotenv.config();
 async function findUsersByEmail({
   emails,
 }) {
-  if (
-    !Array.isArray(
-      emails
-    )
-  ) {
-    throw new Error(
-      "emails must be an array."
-    );
-  }
+  try {
+    if (
+      !Array.isArray(
+        emails
+      )
+    ) {
+      throw new Error(
+        "emails must be an array."
+      );
+    }
 
-  const users = [];
+    const users = [];
 
-  for (
-    const email
-    of emails
-  ) {
-    const response =
-      await boltApp.client.users.lookupByEmail({
-        token:
-          process.env.SLACK_BOT_TOKEN,
+    for (
+      const email
+      of emails
+    ) {
+      const response =
+        await boltApp.client.users.lookupByEmail({
+          token:
+            process.env.SLACK_BOT_TOKEN,
+          email,
+        });
+
+      users.push({
         email,
+        slackMemberId:
+          response.user.id,
       });
+    }
 
-    users.push({
-      email,
-      slackMemberId:
-        response.user.id,
-    });
+    return users;
+  } catch (error) {
+    const err = new Error(
+      `findUsersByEmail failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
   }
-
-  return users;
 }
 
 export default findUsersByEmail;

@@ -12,24 +12,32 @@ async function linkProjectToThread({
   projectId,
   threadId,
 }) {
-  if (!projectId) {
-    throw new Error(
-      "projectId is required."
-    );
-  }
+  try {
+    if (!projectId) {
+      throw new Error(
+        "projectId is required."
+      );
+    }
 
-  if (!threadId) {
-    throw new Error(
-      "threadId is required."
-    );
-  }
+    if (!threadId) {
+      throw new Error(
+        "threadId is required."
+      );
+    }
 
-  return await prisma.thread.create({
-    data: {
-      thread_id: threadId,
-      project_id: projectId,
-    },
-  });
+    return await prisma.thread.create({
+      data: {
+        thread_id: threadId,
+        project_id: projectId,
+      },
+    });
+  } catch (error) {
+    const err = new Error(
+      `linkProjectToThread failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
+  }
 }
 
 export default linkProjectToThread;

@@ -8,13 +8,19 @@ async function fetchDocumentsForProject(
             "projectId is required."
         );
     }
-
-    return await prisma.document.findMany({
-        where: {
-            project_id:
-                projectId,
-        },
-    });
+    try {
+        return await prisma.document.findMany({
+            where: {
+                project_id: projectId,
+            },
+        });
+    } catch (error) {
+        const err = new Error(
+            `fetchDocumentsForProject failed: ${error && error.message ? error.message : String(error)}`
+        );
+        err.originalError = error;
+        throw err;
+    }
 }
 
 export default fetchDocumentsForProject;

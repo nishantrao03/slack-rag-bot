@@ -9,18 +9,26 @@ import prisma from "../../../services/db/prisma-client.js";
  * @returns {Array} Created channel records
  */
 async function linkProjectsToChannel({ projectId, channels }) {
-  const dataToInsert = channels.map((channel) => ({
-    channel_id: channel.channelId,
-    name: channel.name,
-    is_private: channel.isPrivate,
-    project_id: projectId,
-  }));
+  try {
+    const dataToInsert = channels.map((channel) => ({
+      channel_id: channel.channelId,
+      name: channel.name,
+      is_private: channel.isPrivate,
+      project_id: projectId,
+    }));
 
-  const createdChannels = await prisma.channel.createManyAndReturn({
-    data: dataToInsert,
-  });
+    const createdChannels = await prisma.channel.createManyAndReturn({
+      data: dataToInsert,
+    });
 
-  return createdChannels;
+    return createdChannels;
+  } catch (error) {
+    const err = new Error(
+      `linkProjectsToChannel failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
+  }
 }
 
 export default linkProjectsToChannel;

@@ -12,30 +12,38 @@ async function linkProjectToUsers({
   projectId,
   users,
 }) {
-  if (!projectId) {
-    throw new Error(
-      "projectId is required."
+  try {
+    if (!projectId) {
+      throw new Error(
+        "projectId is required."
+      );
+    }
+
+    if (!Array.isArray(users)) {
+      throw new Error(
+        "users must be an array."
+      );
+    }
+
+    const data = users.map(
+      ({ userId, role }) => ({
+        project_id: projectId,
+        user_id: userId,
+        role,
+      })
     );
-  }
 
-  if (!Array.isArray(users)) {
-    throw new Error(
-      "users must be an array."
+    return await prisma.projectMember.createMany({
+      data,
+      skipDuplicates: true,
+    });
+  } catch (error) {
+    const err = new Error(
+      `linkProjectToUsers failed: ${error && error.message ? error.message : String(error)}`
     );
+    err.originalError = error;
+    throw err;
   }
-
-  const data = users.map(
-    ({ userId, role }) => ({
-      project_id: projectId,
-      user_id: userId,
-      role,
-    })
-  );
-
-  return await prisma.projectMember.createMany({
-    data,
-    skipDuplicates: true,
-  });
 }
 
 export default linkProjectToUsers;

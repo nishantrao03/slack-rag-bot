@@ -1,4 +1,4 @@
-import boltApp from "../bolt.js";
+import boltApp from "../../slack/bolt.js";
 import dotenv from 'dotenv';
 dotenv.config();
 
@@ -10,51 +10,59 @@ dotenv.config();
  * @returns {Array} List of messages with optional thread replies
  */
 export async function getChannelHistory({ channel }) {
-  const historyResponse = await boltApp.client.conversations.history({
-    token: process.env.SLACK_BOT_TOKEN,
-    channel,
-    limit: 50,
-  });
+  try {
+    const historyResponse = await boltApp.client.conversations.history({
+      token: process.env.SLACK_BOT_TOKEN,
+      channel,
+      limit: 50,
+    });
 
-  if (!historyResponse.ok) {
-    throw new Error(historyResponse.error);
-  }
-
-  const messagesWithThreads = [];
-
-  for (const message of historyResponse.messages) {
-    const messageData = {
-      user: message.user,
-      text: message.text,
-      ts: message.ts,
-      threadReplies: [],
-    };
-
-    if (message.thread_ts) {
-      const repliesResponse = await boltApp.client.conversations.replies({
-        token: process.env.SLACK_BOT_TOKEN,
-        channel,
-        ts: message.thread_ts,
-      });
-
-      if (!repliesResponse.ok) {
-        throw new Error(repliesResponse.error);
-      }
-
-      for (const reply of repliesResponse.messages.slice(1)) {
-        messageData.threadReplies.push({
-          user: reply.user,
-          text: reply.text,
-          ts: reply.ts,
-        });
-        console.log("Fetched reply:", reply);
-      }
+    if (!historyResponse.ok) {
+      throw new Error(historyResponse.error);
     }
 
-    messagesWithThreads.push(messageData);
-  }
+    const messagesWithThreads = [];
 
-  return messagesWithThreads;
+    for (const message of historyResponse.messages) {
+      const messageData = {
+        user: message.user,
+        text: message.text,
+        ts: message.ts,
+        threadReplies: [],
+      };
+
+      if (message.thread_ts) {
+        const repliesResponse = await boltApp.client.conversations.replies({
+          token: process.env.SLACK_BOT_TOKEN,
+          channel,
+          ts: message.thread_ts,
+        });
+
+        if (!repliesResponse.ok) {
+          throw new Error(repliesResponse.error);
+        }
+
+        for (const reply of repliesResponse.messages.slice(1)) {
+          messageData.threadReplies.push({
+            user: reply.user,
+            text: reply.text,
+            ts: reply.ts,
+          });
+          console.log("Fetched reply:", reply);
+        }
+      }
+
+      messagesWithThreads.push(messageData);
+    }
+
+    return messagesWithThreads;
+  } catch (error) {
+    const err = new Error(
+      `getChannelHistory failed: ${error && error.message ? error.message : String(error)}`
+    );
+    err.originalError = error;
+    throw err;
+  }
 }
 
 export default getChannelHistory;
