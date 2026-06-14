@@ -41,21 +41,55 @@ export default async function buildMessages({
   }
 
   // Case 2: Existing thread
-  const threadMessages =
-    await getThreadReplies({
-      channel:
-        event.channel,
-      threadTs
-    });
+const threadMessages =
+  await getThreadReplies({
+    channel:
+      event.channel,
+    threadTs
+  });
 
-  const formattedMessages =
-    threadMessages
-      .filter(
-        (msg) =>
-          msg.text &&
-          msg.user
-      )
-      .map((msg) => ({
+const formattedMessages =
+  threadMessages
+    .filter(
+      (msg) =>
+        msg.text &&
+        msg.user
+    )
+    .map((msg) => {
+      const content = {
+        text:
+          msg.text,
+        user:
+          msg.user,
+        thread_ts:
+          msg.thread_ts
+      };
+
+      if (
+        Array.isArray(
+          msg.files
+        ) &&
+        msg.files.length > 0
+      ) {
+        content.files =
+          msg.files.map(
+            (file) => ({
+              filetype:
+                file.filetype,
+
+              size:
+                file.size,
+
+              url_private_download:
+                file.url_private_download,
+
+              permalink_public:
+                file.permalink_public
+            })
+          );
+      }
+
+      return {
         role:
           msg.user ===
           process.env
@@ -63,11 +97,16 @@ export default async function buildMessages({
             ? "assistant"
             : "user",
         content:
-          msg.text
-      }));
+          JSON.stringify(
+            content
+          )
+      };
+    });
 
-  return [
-    systemMessage,
-    ...formattedMessages
-  ];
+console.log(formattedMessages);
+
+return [
+  systemMessage,
+  ...formattedMessages
+];
 }

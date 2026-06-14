@@ -1,0 +1,21 @@
+[
+  {
+    "type": "function",
+    "function": {
+      "name": "example_tool",
+      "description": "Purpose:\nDescribe the single responsibility of the tool.\n\nUse When:\n- Situation where the tool should be selected.\n- Another valid use case.\n\nDo Not Use When:\n- Situation where another tool or workflow should be preferred.\n- Situation where the tool is not applicable.\n\nImportant Notes:\n- Special behavior or limitations.\n- Workflow preferences if applicable.",
+      "parameters": {
+        "type": "object",
+        "properties": {
+          "exampleParameter": {
+            "type": "string",
+            "description": "Description of the parameter."
+          }
+        },
+        "required": [
+          "exampleParameter"
+        ]
+      }
+    }
+  }
+]
